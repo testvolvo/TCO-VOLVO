@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora TCO GNL</title>
+  <style>
+    :root{
+      --cyan:#00FFFF;
+      --cyan-dark:#0098a6;
+      --cyan-soft:#dfffff;
+      --ink:#06262d;
+      --muted:#55717a;
+      --line:rgba(6,38,45,.12);
+      --panel:rgba(255,255,255,.86);
+      --white:#fff;
+      --shadow:0 18px 55px rgba(0,83,92,.16);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 8% 8%, rgba(0,255,255,.55) 0 0, transparent 26%),
+        linear-gradient(135deg,#f6ffff 0%,#eaffff 38%,#ffffff 100%);
+      min-height:100vh;
+    }
+    .app{width:min(1420px,calc(100% - 32px));margin:0 auto;padding:24px 0 60px}
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:32px;
+      min-height:210px;
+      padding:30px;
+      background:
+        linear-gradient(135deg,rgba(0,255,255,1) 0%,rgba(0,244,255,.78) 42%,rgba(255,255,255,.94) 100%);
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.6);
+    }
+    .hero:before{
+      content:"";
+      position:absolute;
+      inset:-40% -8% auto auto;
+      width:520px;height:520px;border-radius:50%;
+      background:rgba(255,255,255,.34);
+      filter:blur(2px);
+    }
+    .hero:after{
+      content:"";
+      position:absolute;
+      right:-120px;bottom:-150px;
+      width:520px;height:330px;
+      border:2px solid rgba(6,38,45,.12);
+      border-radius:50%;
+      transform:rotate(-12deg);
+    }
+    .brand{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      z-index:2;
+    }
+    .logoBox{
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:#05353c;
+    }
+    .logoMark{
+      width:48px;height:48px;border-radius:16px;
+      background:#05353c;color:var(--cyan);
+      display:grid;place-items:center;font-weight:900;
+      box-shadow:0 12px 24px rgba(6,38,45,.18);
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid rgba(6,38,45,.16);
+      background:rgba(255,255,255,.5);
+      backdrop-filter:blur(8px);
+      padding:10px 14px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:750;
+    }
+    h1{
+      position:relative;
+      z-index:2;
+      margin:28px 0 10px;
+      font-size:clamp(34px,4.7vw,66px);
+      line-height:.96;
+      letter-spacing:-.05em;
+      max-width:900px;
+    }
+    .heroText{
+      position:relative;z-index:2;
+      max-width:760px;
+      color:#083e45;
+      font-size:17px;
+      line-height:1.55;
+      margin:0;
+      font-weight:560;
+    }
+    .toolbar{
+      margin-top:18px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      position:relative;z-index:2;
+    }
+    button,.btn{
+      border:0;
+      border-radius:16px;
+      padding:12px 16px;
+      font-weight:850;
+      cursor:pointer;
+      color:var(--ink);
+      background:#fff;
+      box-shadow:0 8px 22px rgba(6,38,45,.12);
+      transition:.18s ease;
+      text-decoration:none;
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:14px;
+    }
+    button:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(6,38,45,.16)}
+    .btnPrimary{background:#052b31;color:#fff}
+    .btnGhost{background:rgba(255,255,255,.62);border:1px solid rgba(6,38,45,.16);box-shadow:none}
+    .grid{display:grid;grid-template-columns:390px 1fr;gap:18px;margin-top:18px}
+    .panel{
+      background:var(--panel);
+      border:1px solid rgba(255,255,255,.88);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .panelHeader{
+      padding:18px 20px;
+      display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
+      border-bottom:1px solid var(--line);
+      background:linear-gradient(180deg,rgba(255,255,255,.86),rgba(255,255,255,.55));
+    }
+    .panelTitle{margin:0;font-size:16px;letter-spacing:-.02em}
+    .panelSub{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.35}
+    .panelBody{padding:18px 20px}
+    .selectorWrap{display:grid;gap:12px;margin-bottom:16px}
+
+    .editTargetWrap{padding:12px;border-radius:16px;background:#f4ffff;border:1px solid rgba(0,152,166,.18);margin:4px 0 2px}
+    .editTargetButtons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .miniToggle{box-shadow:none;border:1px solid var(--line);background:#fff;justify-content:center;padding:10px 8px;border-radius:12px;font-size:12px;color:#31555d}
+    .miniToggle.active{background:#052b31;color:#fff;border-color:#052b31}
+    .panel.editingCompare{border-color:rgba(0,201,213,.45);box-shadow:0 18px 55px rgba(0,201,213,.20)}
+    .panel.editingCompare .panelHeader{background:linear-gradient(180deg,rgba(226,255,255,.96),rgba(255,255,255,.62))}
+    label{font-size:12px;font-weight:850;color:#294a51;display:block;margin-bottom:6px}
+    select,input[type="number"],input[type="text"]{
+      width:100%;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--ink);
+      border-radius:14px;
+      padding:12px 12px;
+      outline:none;
+      font-size:14px;
+      transition:.15s ease;
+    }
+    select:focus,input:focus{border-color:var(--cyan-dark);box-shadow:0 0 0 4px rgba(0,255,255,.25)}
+    .tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+    .tab{
+      background:#f2ffff;
+      border:1px solid var(--line);
+      box-shadow:none;
+      justify-content:center;
+      padding:11px 10px;
+      border-radius:14px;
+      color:#244a52;
+    }
+    .tab.active{background:#052b31;color:#fff;border-color:#052b31}
+    .fieldGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .fieldGrid.one{grid-template-columns:1fr}
+    .fxInputBlock{grid-column:auto}
+    .fxActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .miniAction{
+      padding:8px 10px;
+      border-radius:11px;
+      font-size:11px;
+      box-shadow:none;
+      background:#f2ffff;
+      border:1px solid rgba(0,152,166,.22);
+      color:#073b42;
+    }
+    .fxStatus{font-size:11px;color:#55717a;font-weight:750;line-height:1.25}
+    .fxStatus:empty{display:none}
+    .fxStatus.ok{color:#006b44}
+    .fxStatus.warn{color:#8a5a00}
+    .fxStatus.error{color:#a23333}
+    .sectionName{
+      margin:20px 0 10px;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:#007580;
+      display:flex;align-items:center;gap:8px;
+    }
+    .sectionName:before{content:"";width:9px;height:9px;border-radius:50%;background:var(--cyan-dark);box-shadow:0 0 0 6px rgba(0,255,255,.22)}
+    .switchLine{
+      display:flex;gap:10px;align-items:center;justify-content:space-between;
+      padding:12px 0 0;
+      color:var(--muted);font-size:12px;line-height:1.35;
+    }
+    .switchLine input{width:18px;height:18px;accent-color:var(--cyan-dark)}
+    .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+    .kpi{
+      position:relative;
+      min-height:136px;
+      padding:18px;
+      border-radius:22px;
+      background:rgba(255,255,255,.88);
+      border:1px solid rgba(6,38,45,.08);
+      overflow:hidden;
+    }
+    .kpi:after{
+      content:"";position:absolute;right:-30px;top:-38px;width:120px;height:120px;border-radius:50%;
+      background:rgba(0,255,255,.26);
+    }
+    .kpi strong{display:block;font-size:12px;color:#58737b;margin-bottom:12px;position:relative;z-index:2;text-transform:uppercase;letter-spacing:.07em}
+    .kpi .value{font-size:clamp(22px,2.3vw,34px);font-weight:950;letter-spacing:-.04em;position:relative;z-index:2;line-height:1.05}
+    .kpi small{display:block;margin-top:8px;color:#66828a;position:relative;z-index:2;font-weight:650}
+    .kpi.main{background:#052b31;color:#fff}
+    .kpi.main strong,.kpi.main small{color:#b7ffff}
+    .kpi.main:after{background:rgba(0,255,255,.35)}
+    .mainGrid{display:grid;grid-template-columns:1.04fr .96fr;gap:18px}
+    .chartBox{height:310px;padding:18px;border-radius:22px;background:#fff;border:1px solid var(--line)}
+    .chartBox canvas{width:100%;height:235px;display:block}
+    .chartTitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .chartTitle h3{font-size:15px;margin:0;letter-spacing:-.02em}
+    .chartTitle span{font-size:12px;font-weight:800;color:#637d84;background:#f0ffff;border:1px solid var(--line);border-radius:999px;padding:7px 10px}
+    .donutLayout{display:grid;grid-template-columns:minmax(255px,1.25fr) .75fr;gap:16px;align-items:center;height:245px}
+    .donutLayout canvas{height:240px}
+    .chartLegend{display:grid;gap:7px;align-content:center;min-width:0}
+    .legendRow{display:grid;grid-template-columns:12px 1fr auto;gap:8px;align-items:center;font-size:12px;color:#55717a}
+    .legendDot{width:10px;height:10px;border-radius:999px;background:var(--c)}
+    .legendName{font-weight:780;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#294a51}
+    .legendValue{text-align:right;font-weight:850;color:#052b31}
+    .interpretationBox{margin-top:14px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#eaffff,#fff);border:1px solid rgba(0,152,166,.18)}
+    .interpretationBox strong{display:block;font-size:13px;margin-bottom:5px;color:#052b31}
+    .interpretationBox p{margin:0;color:#49676f;font-size:13px;line-height:1.45}
+    table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:18px;overflow:hidden}
+    th,td{padding:11px 12px;text-align:right;border-bottom:1px solid var(--line)}
+    th:first-child,td:first-child{text-align:left}
+    th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#547178;background:#f3ffff}
+    tr:last-child td{border-bottom:0}
+    .tag{font-size:11px;font-weight:850;color:#005d66;background:rgba(0,255,255,.2);padding:6px 8px;border-radius:999px;white-space:nowrap}
+    .comparePanel{margin-top:18px}
+    .comparison{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .compareCard{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;min-height:160px}
+    .compareCard h3{margin:0 0 8px;font-size:16px}
+    .compareCard .big{font-size:30px;font-weight:950;letter-spacing:-.04em;margin:10px 0 4px}
+    .delta{padding:16px;border-radius:20px;border:1px solid rgba(0,152,166,.22);background:linear-gradient(135deg,#e7ffff,#fff);margin-top:14px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+    .delta .big{font-size:30px;font-weight:950;letter-spacing:-.04em}
+    .compareGrid{display:grid;grid-template-columns:1.05fr .95fr;gap:14px;margin-top:14px;align-items:stretch}
+    .compareChartBox{height:365px;padding-bottom:24px}
+    .compareChartBox canvas{height:260px}
+    .compareTableWrap{overflow:auto;border-radius:20px;border:1px solid var(--line);background:#fff}
+    .compareTableWrap table{border-radius:0}
+    .compareAssumption{margin-top:12px;padding:10px 12px;border-radius:14px;background:#f3ffff;border:1px solid rgba(0,152,166,.16)}
+    .miniLegend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;font-weight:850;color:#55717a;align-items:center;margin-top:16px;padding:0 2px 4px}
+    .miniLegend span{display:inline-flex;align-items:center;gap:6px}
+    .miniLegend i{width:10px;height:10px;border-radius:999px;display:inline-block;background:var(--c)}
+
+    .compareDistributionGrid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
+    .compareDistributionBox{height:360px}
+    .compareDistributionBox .donutLayout{grid-template-columns:minmax(260px,.78fr) 1.22fr;height:270px;gap:18px}
+    .compareDistributionBox canvas{height:255px}
+    .compareDistributionBox .legendRow{font-size:12px;grid-template-columns:11px 1fr auto;gap:8px}
+    .compareDonutInsight{margin-top:14px}
+    .compareDonutInsight p{max-width:1120px}
+
+    .fuelTransparencyPanel{margin-bottom:18px}
+    .fuelBreakdownGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .fuelDataCard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;min-height:102px}
+    .fuelDataCard strong{display:block;font-size:11px;color:#55717a;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+    .fuelDataCard .fuelValue{font-size:22px;font-weight:950;letter-spacing:-.04em;color:#052b31;line-height:1.05}
+    .fuelDataCard small{display:block;margin-top:7px;color:#66828a;font-size:11px;font-weight:650;line-height:1.25}
+    .note{color:var(--muted);font-size:12px;line-height:1.45;margin:10px 0 0}
+    .hidden{display:none!important}
+    .footerNote{margin:20px 2px 0;color:#66828a;font-size:12px;line-height:1.5;text-align:center}
+    @media(max-width:1120px){.grid{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,1fr)}.fuelBreakdownGrid{grid-template-columns:repeat(2,1fr)}.mainGrid{grid-template-columns:1fr}.panel.sticky{position:static}.comparison{grid-template-columns:1fr}.compareGrid{grid-template-columns:1fr}.compareDistributionGrid{grid-template-columns:1fr}}
+    @media(min-width:1121px){.panel.sticky{position:sticky;top:16px;align-self:start}}
+    @media(max-width:620px){.app{width:min(100% - 18px,1420px);padding-top:10px}.hero{padding:22px;border-radius:24px}.brand{align-items:flex-start;flex-direction:column}.cards{grid-template-columns:1fr}.fuelBreakdownGrid{grid-template-columns:1fr}.fieldGrid{grid-template-columns:1fr}.tabs{grid-template-columns:1fr}.editTargetButtons{grid-template-columns:1fr}.chartBox{height:auto;min-height:350px}.donutLayout{height:auto;grid-template-columns:1fr}.donutLayout canvas{height:230px}.compareDistributionBox .donutLayout{height:auto;grid-template-columns:1fr}.chartLegend{grid-template-columns:1fr 1fr}th,td{font-size:12px;padding:9px 8px}.toolbar{align-items:stretch}.toolbar button{width:100%;justify-content:center}}
+    @media print{
+      body{background:#fff}
+      .app{width:100%;padding:0}
+      .hero,.panel,.kpi,.chartBox,.compareCard,.delta{box-shadow:none!important}
+      .hero{border-radius:0;min-height:auto;padding:18px 22px}
+      .grid{display:block;margin:0}
+      .sticky{display:none}
+      .toolbar,.tabs,.btnGhost{display:none!important}
+      .cards{grid-template-columns:repeat(4,1fr);gap:8px}
+      .mainGrid{grid-template-columns:1fr 1fr;gap:10px}
+      .panel{page-break-inside:avoid;margin-top:10px;border-radius:16px}
+      .chartBox{height:280px}
+      .chartBox canvas{height:205px}
+      .donutLayout{height:220px}
+      .interpretationBox{page-break-inside:avoid}
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="brand">
+        <div class="logoBox"><div class="logoMark">GNL</div><div>TCO Calculator</div></div>
+      </div>
+      <h1>Calculadora TCO GNL</h1>
+      <div class="toolbar">
+        <button class="btnPrimary" id="printBtn">Generar PDF</button>
+        <button class="btnGhost" id="resetBtn">Restaurar valores del Excel</button>
+      </div>
+    </section>
+
+    <section class="grid">
+      <aside class="panel sticky" id="paramPanel">
+        <div class="panelHeader">
+          <div><h2 class="panelTitle" id="paramsTitle">Parámetros editables</h2><p class="panelSub" id="paramsSub">Cambia modelo, flota, precios y costos para recalcular en vivo.</p></div>
+        </div>
+        <div class="panelBody">
+          <div class="tabs">
+            <button class="tab active" id="modeSingle">TCO individual/flota</button>
+            <button class="tab" id="modeCompare">Comparar modelos</button>
+          </div>
+          <div class="selectorWrap">
+            <div>
+              <label for="modelSelect">Modelo principal</label>
+              <select id="modelSelect"></select>
+            </div>
+            <div id="compareSelector" class="hidden">
+              <label for="competitorSelect">Modelo de comparación</label>
+              <select id="competitorSelect"></select>
+              <div id="compareCustomNameWrap" class="hidden" style="margin-top:10px">
+                <label for="compareCustomName">Nombre personalizado</label>
+                <input id="compareCustomName" type="text" placeholder="Ej: Competidor GNL / marca propia" />
+              </div>
+            </div>
+            <div id="editTargetWrap" class="editTargetWrap hidden">
+              <label>Editar parámetros de</label>
+              <div class="editTargetButtons">
+                <button class="miniToggle active" id="editMainBtn" type="button">Modelo principal</button>
+                <button class="miniToggle" id="editCompareBtn" type="button">Modelo comparado</button>
+              </div>
+              <p class="note" id="editTargetNote">Los campos de abajo editan el modelo principal.</p>
+            </div>
+            <div>
+              <label for="applicationSelect">Aplicación / tipo de faena</label>
+              <select id="applicationSelect"></select>
+            </div>
+            <div id="customModelWrap" class="hidden">
+              <div class="fieldGrid">
+                <div><label for="customName">Nombre personalizado</label><input id="customName" type="text" placeholder="Ej: Competidor GNL / marca propia" /></div>
+                <div><label for="fuelTypeSelect">Tipo combustible</label><select id="fuelTypeSelect"><option value="diesel">Diésel</option><option value="gnl">GNL</option></select></div>
+              </div>
+              <p class="note">Selecciona “Personalizado” para escribir nombre y datos propios. Queda guardado mientras la página esté abierta y lo puedes usar como comparación.</p>
+            </div>
+          </div>
+
+          <div class="sectionName">Datos comerciales</div>
+          <div class="fieldGrid">
+            <div><label for="priceUsd">Valor camión USD</label><input id="priceUsd" type="number" step="100" /></div>
+            <div class="fxInputBlock"><label for="exchangeRate">Tipo de cambio</label><input id="exchangeRate" type="number" step="1" readonly />
+              <div class="fxActions"><button class="miniAction" id="updateDollarBtn" type="button">Actualizar dólar BC</button><span class="fxStatus" id="dollarStatus"></span></div>
+            </div>
+            <div><label for="residualValue">Valor residual CLP</label><input id="residualValue" type="number" step="100000" /></div>
+            <div><label for="usefulYears">Vida útil años</label><input id="usefulYears" type="number" step="1" min="1" /></div>
+          </div>
+
+          <div class="sectionName">Operación</div>
+          <div class="fieldGrid">
+            <div><label for="kmMonth">Km promedio mes</label><input id="kmMonth" type="number" step="100" /></div>
+            <div><label for="fleetSize">Camiones flota</label><input id="fleetSize" type="number" step="1" min="1" /></div>
+            <div><label id="consumptionLabel" for="consumption">Consumo promedio</label><input id="consumption" type="number" step="0.01" /></div>
+            <div><label for="adminExpenses">Gastos adm. flota CLP</label><input id="adminExpenses" type="number" step="10000" /></div>
+          </div>
+
+          <div class="sectionName">Combustibles</div>
+          <div class="fieldGrid" id="fuelFields"></div>
+
+          <div class="sectionName">Costos mensuales</div>
+          <div class="fieldGrid">
+            <div><label for="insurance">Seguro</label><input id="insurance" type="number" step="10000" /></div>
+            <div><label for="gps">GPS / gestión flota</label><input id="gps" type="number" step="1000" /></div>
+            <div><label for="salary">Sueldo conductor</label><input id="salary" type="number" step="10000" /></div>
+            <div><label for="maintenance">Mantención</label><input id="maintenance" type="number" step="10000" /></div>
+            <div><label for="tires">Neumáticos</label><input id="tires" type="number" step="10000" /></div>
+            <div><label for="tolls">Peajes</label><input id="tolls" type="number" step="1000" /></div>
+            <div><label for="dailyDriver">Gastos diarios conductor</label><input id="dailyDriver" type="number" step="1000" /></div>
+            <div><label for="permit">Permiso / patente</label><input id="permit" type="number" step="1000" /></div>
+          </div>
+          <div class="fieldGrid one" id="financeWrap" style="margin-top:12px">
+            <div><label for="financing">Cuota financiamiento</label><input id="financing" type="number" step="10000" /></div>
+          </div>
+        </div>
+      </aside>
+
+      <section>
+        <div class="cards" id="kpiCards">
+          <div class="kpi main"><strong>Costo final / km</strong><div class="value" id="kpiCostKm">$0</div><small>CLP por kilómetro</small></div>
+          <div class="kpi"><strong>Costo mensual</strong><div class="value" id="kpiMonthly">$0</div><small>Por camión</small></div>
+          <div class="kpi"><strong>Flota mensual</strong><div class="value" id="kpiFleetMonthly">$0</div><small>Todos los camiones</small></div>
+          <div class="kpi"><strong>Combustible / km</strong><div class="value" id="kpiFuelKm">$0</div><small id="fuelKpiText">GNL + apoyo</small></div>
+        </div>
+
+        <div class="panel fuelTransparencyPanel" id="singleFuelPanel">
+          <div class="panelHeader">
+            <div><h2 class="panelTitle">Consumo de combustible</h2><p class="panelSub">Rendimiento y consumo mensual separados por tipo de combustible.</p></div>
+            <span class="tag" id="singleFuelTypeTag">Combustible</span>
+          </div>
+          <div class="panelBody">
+            <div class="fuelBreakdownGrid" id="singleFuelBreakdown"></div>
+            <p class="note" id="singleFuelNote">El consumo se calcula con los kilómetros mensuales y el rendimiento del modelo seleccionado.</p>
+          </div>
+        </div>
+
+        <div class="panel" id="singleVisualPanel">
+          <div class="panelHeader">
+            <div><h2 class="panelTitle">Resumen visual</h2><p class="panelSub">Distribución de costos por kilómetro según los parámetros actuales.</p></div>
+            <span class="tag" id="modelTag">FM 62T GNL</span>
+          </div>
+          <div class="panelBody">
+            <div class="mainGrid">
+              <div class="chartBox">
+                <div class="chartTitle"><h3>Distribución costo operacional</h3><span id="costDistributionLabel">0 conceptos</span></div>
+                <div class="donutLayout">
+                  <canvas id="pieCanvas"></canvas>
+                  <div class="chartLegend" id="distributionLegend"></div>
+                </div>
+              </div>
+              <div class="chartBox">
+                <div class="chartTitle"><h3>Principales costos / km</h3><span>CLP/km</span></div>
+                <canvas id="barCanvas"></canvas>
+              </div>
+            </div>
+            <div class="interpretationBox">
+              <strong>Lectura rápida</strong>
+              <p id="interpretationText">Ajusta los datos para ver la interpretación del costo operacional.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="detailPanel" style="margin-top:18px">
+          <div class="panelHeader">
+            <div><h2 class="panelTitle">Detalle de cálculo</h2><p class="panelSub">Separación mensual y por kilómetro para revisar de dónde sale el costo final.</p></div>
+          </div>
+          <div class="panelBody">
+            <table>
+              <thead><tr><th>Concepto</th><th>Mensual</th><th>$/km</th><th>Tipo</th></tr></thead>
+              <tbody id="detailRows"></tbody>
+            </table>
+            <p class="note">Base de cálculo: depreciación, seguro, patente, GPS, administración y contrato de mantención se tratan como costos fijos; conductor, combustible, neumáticos, peajes, gastos diarios y mantención manual como costos variables.</p>
+          </div>
+        </div>
+
+        <div class="panel comparePanel hidden" id="comparePanel">
+          <div class="panelHeader">
+            <div><h2 class="panelTitle">Comparación rápida</h2><p class="panelSub">Ambos modelos visibles en una misma vista, con la distribución de costos de cada uno.</p></div>
+          </div>
+          <div class="panelBody">
+            <div class="comparison">
+              <div class="compareCard"><h3 id="leftName">Modelo A</h3><p class="note">Costo final por kilómetro</p><div class="big" id="leftCost">$0</div><p class="note" id="leftMonthly">Costo mensual: $0</p><p class="note" id="leftFleet">Flota mensual: $0</p></div>
+              <div class="compareCard"><h3 id="rightName">Modelo B</h3><p class="note">Costo final por kilómetro</p><div class="big" id="rightCost">$0</div><p class="note" id="rightMonthly">Costo mensual: $0</p><p class="note" id="rightFleet">Flota mensual: $0</p></div>
+            </div>
+            <div class="delta">
+              <div><strong id="deltaTitle">Diferencia</strong><p class="note" id="deltaDescription">Selecciona modelos para comparar.</p></div>
+              <div class="big" id="deltaValue">$0</div>
+            </div>
+            <p></p>
+            <div class="compareDistributionGrid">
+              <div class="chartBox compareDistributionBox">
+                <div class="chartTitle"><h3 id="leftDistTitle">Distribución modelo principal</h3><span id="leftDistCost">CLP/km</span></div>
+                <div class="donutLayout">
+                  <canvas id="leftPieCanvas"></canvas>
+                  <div class="chartLegend" id="leftDistributionLegend"></div>
+                </div>
+              </div>
+              <div class="chartBox compareDistributionBox">
+                <div class="chartTitle"><h3 id="rightDistTitle">Distribución modelo comparado</h3><span id="rightDistCost">CLP/km</span></div>
+                <div class="donutLayout">
+                  <canvas id="rightPieCanvas"></canvas>
+                  <div class="chartLegend" id="rightDistributionLegend"></div>
+                </div>
+              </div>
+            </div>
+            <div class="interpretationBox compareDonutInsight">
+              <strong>Lectura de los gráficos circulares</strong>
+              <p id="compareDonutInterpretation">Selecciona modelos para interpretar la distribución de costos.</p>
+            </div>
+            <div class="compareGrid">
+              <div class="chartBox compareChartBox">
+                <div class="chartTitle"><h3>Comparación por componente</h3><span>CLP/km</span></div>
+                <canvas id="compareCanvas"></canvas>
+                <div class="miniLegend"><span><i style="--c:#052b31"></i><b id="legendLeft">Modelo A</b></span><span><i style="--c:#00c9d5"></i><b id="legendRight">Modelo B</b></span></div>
+              </div>
+              <div class="compareTableWrap">
+                <table>
+                  <thead><tr><th>Indicador</th><th id="compareHeadLeft">Modelo A</th><th id="compareHeadRight">Modelo B</th><th>Diferencia</th></tr></thead>
+                  <tbody id="comparisonRows"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="interpretationBox">
+              <strong>Resultado de comparación</strong>
+              <p id="compareInterpretation">Selecciona modelos para comparar.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="footerNote">Archivo local con dólar del Banco Central vía Google Apps Script. Puedes editar valores operacionales e imprimir a PDF.</p>
+      </section>
+    </section>
+  </main>
+
+<script>
+const APPLICATIONS = [
+  "Distribución Regional",
+  "Larga Distancia Demandante",
+  "Larga Distancia Económica",
+  "Construcción y Minería",
+  "Forestal"
+];
+const CUSTOM_KEY = "__custom__";
+const CUSTOM_LABEL = "Personalizado";
+const BCCH_PROXY_URL = 'https://script.google.com/macros/s/AKfycbzT5BLypUWP3HyEtcWONJAY10QXiUQDx8_P87deS2Y6ztIP7YCIe20kVgHdBj5grdGnNg/exec';
+const BCCH_API_KEY = 'volvo2026';
+const BC_DOLLAR_AUTO_LOAD = true;
+const MODELS = {
+  "FM 62T GNL": {
+    type:"gnl", application:"Distribución Regional", priceUsd:175000, exchangeRate:950, residualValue:75000000, usefulYears:6, kmMonth:22000, fleetSize:15, adminExpenses:12000000,
+    consumption:4.8, dieselPrice:750, gnlPrice:700, ureaPrice:500, dieselPct:0.08, ureaPct:0.135,
+    cmOroRate:45, cmBlueRate:0, permit:44125, insurance:300000, gps:45000, salary:5000000, financing:2500000,
+    maintenanceFormula:"5000000/fleet", maintenance:5000000/15, tires:600000, tolls:140000, dailyDriver:300000
+  },
+  "FM 62T": {
+    type:"diesel", application:"Distribución Regional", priceUsd:131500, exchangeRate:950, residualValue:52500000, usefulYears:6, kmMonth:22000, fleetSize:20, adminExpenses:12000000,
+    consumption:2.7, fuelPrice:750,
+    cmOroRate:35, cmBlueRate:0, permit:44125, insurance:300000, gps:45000, salary:5000000, financing:2500000,
+    maintenanceFormula:"5000000/fleet", maintenance:5000000/20, tires:600000, tolls:140000, dailyDriver:300000
+  },
+  [CUSTOM_KEY]: {
+    name:"Personalizado", custom:true, type:"diesel", application:"Distribución Regional", priceUsd:0, exchangeRate:950, residualValue:0, usefulYears:6, kmMonth:22000, fleetSize:1, adminExpenses:0,
+    consumption:2.7, fuelPrice:750, dieselPrice:750, gnlPrice:700, ureaPrice:500, dieselPct:0, ureaPct:0,
+    cmOroRate:0, cmBlueRate:0, permit:0, insurance:0, gps:0, salary:0, financing:0,
+    maintenance:0, tires:0, tolls:0, dailyDriver:0
+  }
+};
+const MODEL_DEFAULTS = structuredClone(MODELS);
+const FIELD_IDS = ["priceUsd","exchangeRate","residualValue","usefulYears","kmMonth","fleetSize","consumption","adminExpenses","insurance","gps","salary","maintenance","tires","tolls","dailyDriver","permit","financing"];
+const $ = (id) => document.getElementById(id);
+const clp = new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0});
+const num = new Intl.NumberFormat('es-CL',{maximumFractionDigits:1});
+let currentMode = 'single';
+let activeModel = 'FM 62T GNL';
+let editTarget = 'main';
+let currentData = structuredClone(MODELS[activeModel]);
+
+function esc(value){
+  return String(value ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+}
+function modelLabel(key){ return key === CUSTOM_KEY ? (MODELS[CUSTOM_KEY].name || CUSTOM_LABEL) : key; }
+function allModelKeys(){ return Object.keys(MODELS); }
+function getCompetitorKey(){
+  const selected = $('competitorSelect')?.value;
+  if(selected && MODELS[selected] && selected !== activeModel) return selected;
+  return allModelKeys().find(k => k !== activeModel) || activeModel;
+}
+function getEditKey(){
+  if(currentMode === 'compare' && editTarget === 'compare') return getCompetitorKey();
+  return activeModel;
+}
+
+function populateSelectors(keepCompetitor=true){
+  const names = allModelKeys();
+  const previousCompetitor = keepCompetitor ? $('competitorSelect')?.value : '';
+  $('modelSelect').innerHTML = names.map(n => `<option value="${esc(n)}">${esc(modelLabel(n))}</option>`).join('');
+  $('modelSelect').value = activeModel;
+  const competitors = names.filter(n => n !== activeModel);
+  $('competitorSelect').innerHTML = competitors.map(n => `<option value="${esc(n)}">${esc(modelLabel(n))}</option>`).join('');
+  if(previousCompetitor && competitors.includes(previousCompetitor)) $('competitorSelect').value = previousCompetitor;
+  if((!$('competitorSelect').value || $('competitorSelect').value === activeModel) && competitors.length) $('competitorSelect').value = competitors[0];
+}
+function populateApplications(){ $('applicationSelect').innerHTML = APPLICATIONS.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join(''); }
+function roundInput(v){ if(!Number.isFinite(Number(v))) return 0; return Math.round(Number(v) * 100) / 100; }
+
+function setDollarStatus(text, state=''){
+  const el = $('dollarStatus');
+  if(!el) return;
+  el.textContent = text || '';
+  el.className = `fxStatus ${state}`.trim();
+}
+function loadBcchJsonp(){
+  return new Promise((resolve, reject) => {
+    const cb = 'bcch_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const script = document.createElement('script');
+    const url = BCCH_PROXY_URL + '?key=' + encodeURIComponent(BCCH_API_KEY) + '&callback=' + encodeURIComponent(cb);
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error('Tiempo de espera agotado consultando Banco Central'));
+    }, 15000);
+    function cleanup(){
+      clearTimeout(timer);
+      try{ delete window[cb]; }catch(_){ window[cb] = undefined; }
+      if(script && script.parentNode) script.parentNode.removeChild(script);
+    }
+    window[cb] = data => {
+      cleanup();
+      resolve(data);
+    };
+    script.onerror = () => {
+      cleanup();
+      reject(new Error('No se pudo cargar la conexión Banco Central'));
+    };
+    script.src = url;
+    document.head.appendChild(script);
+  });
+}
+function applyExchangeRateToAllModels(rate, meta={}){
+  const safeRate = Math.round(Number(rate) * 100) / 100;
+  if(!Number.isFinite(safeRate) || safeRate <= 0) return;
+  allModelKeys().forEach(key => { MODELS[key].exchangeRate = safeRate; });
+  currentData = structuredClone(MODELS[getEditKey()]);
+  fillForm(currentData);
+  renderAll();
+  const dateText = meta.fecha ? ` · ${meta.fecha}` : '';
+  const cacheText = meta.cache ? ' · cache' : '';
+  setDollarStatus(`Banco Central · dólar observado${dateText}${cacheText}`, 'ok');
+}
+async function updateDollarFromBancoCentral(manual=false){
+  try{
+    setDollarStatus('Cargando Banco Central...', 'warn');
+    const data = await loadBcchJsonp();
+    if(!data || !data.ok) throw new Error(data && data.error ? data.error : 'Respuesta no válida del Banco Central');
+    const valor = Number(data.dolar && data.dolar.valor);
+    if(!Number.isFinite(valor) || valor <= 0) throw new Error('No se recibió valor válido del dólar');
+    applyExchangeRateToAllModels(valor, {fecha:data.dolar && data.dolar.fecha, cache:data.cache});
+  }catch(error){
+    console.warn(error);
+    setDollarStatus('Error Banco Central · usando respaldo local', 'error');
+    renderAll();
+  }
+}
+
+function updateEditTargetUI(){
+  if(currentMode !== 'compare') editTarget = 'main';
+  const isCompareEdit = currentMode === 'compare' && editTarget === 'compare';
+  $('editTargetWrap').classList.toggle('hidden', currentMode !== 'compare');
+  $('editMainBtn').classList.toggle('active', !isCompareEdit);
+  $('editCompareBtn').classList.toggle('active', isCompareEdit);
+  $('paramPanel').classList.toggle('editingCompare', isCompareEdit);
+  $('paramsTitle').textContent = isCompareEdit ? 'Parámetros modelo comparado' : 'Parámetros editables';
+  $('paramsSub').textContent = isCompareEdit
+    ? `Estás editando ${modelLabel(getCompetitorKey())}. El modelo principal se mantiene guardado.`
+    : 'Cambia modelo, flota, precios y costos para recalcular en vivo.';
+  $('editTargetNote').textContent = isCompareEdit
+    ? 'Los campos de abajo modifican el modelo comparado.'
+    : 'Los campos de abajo modifican el modelo principal.';
+  showCustomControls();
+  showCompareCustomControls();
+}
+
+function showCustomControls(){
+  const isCustomEditing = getEditKey() === CUSTOM_KEY;
+  $('customModelWrap').classList.toggle('hidden', !isCustomEditing);
+  if(isCustomEditing){
+    $('customName').value = MODELS[CUSTOM_KEY].name || CUSTOM_LABEL;
+    $('fuelTypeSelect').value = MODELS[CUSTOM_KEY].type || 'diesel';
+  }
+}
+function showCompareCustomControls(){
+  const competitorIsCustom = currentMode === 'compare' && getCompetitorKey() === CUSTOM_KEY;
+  $('compareCustomNameWrap').classList.toggle('hidden', !competitorIsCustom);
+  if(competitorIsCustom) $('compareCustomName').value = MODELS[CUSTOM_KEY].name || CUSTOM_LABEL;
+}
+
+function renderFuelFields(type){
+  if(type === 'gnl'){
+    $('fuelFields').innerHTML = `
+      <div><label for="gnlPrice">Precio GNL [kg]</label><input id="gnlPrice" type="number" step="10" /></div>
+      <div><label for="dieselPrice">Precio diésel apoyo [lt]</label><input id="dieselPrice" type="number" step="10" /></div>
+      <div><label for="ureaPrice">Precio urea [lt]</label><input id="ureaPrice" type="number" step="10" /></div>
+      <div><label for="dieselPct">% diésel apoyo</label><input id="dieselPct" type="number" step="0.1" /></div>
+      <div><label for="ureaPct">% urea</label><input id="ureaPct" type="number" step="0.1" /></div>`;
+    ['gnlPrice','dieselPrice','ureaPrice','dieselPct','ureaPct'].forEach(id => $(id).addEventListener('input', syncFromForm));
+  } else {
+    $('fuelFields').innerHTML = `<div><label for="fuelPrice">Precio diésel [lt]</label><input id="fuelPrice" type="number" step="10" /></div>`;
+    $('fuelPrice').addEventListener('input', syncFromForm);
+  }
+}
+function fillForm(data){
+  renderFuelFields(data.type);
+  $('applicationSelect').value = data.application || APPLICATIONS[0];
+  $('consumptionLabel').textContent = data.type === 'gnl' ? 'Rendimiento GNL [km/kg]' : 'Rendimiento diésel [km/lt]';
+  FIELD_IDS.forEach(id => { if($(id)) $(id).value = roundInput(data[id] ?? 0); });
+  if(data.type === 'gnl'){
+    $('gnlPrice').value = roundInput(data.gnlPrice);
+    $('dieselPrice').value = roundInput(data.dieselPrice);
+    $('ureaPrice').value = roundInput(data.ureaPrice);
+    $('dieselPct').value = roundInput((data.dieselPct ?? 0)*100);
+    $('ureaPct').value = roundInput((data.ureaPct ?? 0)*100);
+  } else {
+    $('fuelPrice').value = roundInput(data.fuelPrice);
+  }
+  updateEditTargetUI();
+}
+function saveCurrentModel(){
+  const key = getEditKey();
+  MODELS[key] = structuredClone(currentData);
+  if(key === CUSTOM_KEY){
+    MODELS[CUSTOM_KEY].name = currentData.name || $('customName')?.value?.trim() || CUSTOM_LABEL;
+    MODELS[CUSTOM_KEY].custom = true;
+  }
+}
+function syncFromForm(){
+  const key = getEditKey();
+  const base = currentData;
+  FIELD_IDS.forEach(id => { if($(id)) base[id] = Number($(id).value) || 0; });
+  base.application = $('applicationSelect').value || APPLICATIONS[0];
+  if(key === CUSTOM_KEY){
+    base.name = $('customName').value.trim() || CUSTOM_LABEL;
+    base.custom = true;
+    base.type = $('fuelTypeSelect').value || 'diesel';
+  }
+  if(base.type === 'gnl'){
+    base.gnlPrice = Number($('gnlPrice').value) || 0;
+    base.dieselPrice = Number($('dieselPrice').value) || 0;
+    base.ureaPrice = Number($('ureaPrice').value) || 0;
+    base.dieselPct = (Number($('dieselPct').value) || 0) / 100;
+    base.ureaPct = (Number($('ureaPct').value) || 0) / 100;
+  } else {
+    base.fuelPrice = Number($('fuelPrice').value) || 0;
+  }
+  saveCurrentModel();
+  populateSelectors(true);
+  updateEditTargetUI();
+  renderAll();
+}
+function syncPersonalizedName(inputId){
+  const value = ($(inputId)?.value || '').trim() || CUSTOM_LABEL;
+  MODELS[CUSTOM_KEY].name = value;
+  if(getEditKey() === CUSTOM_KEY){ currentData.name = value; }
+  if(inputId !== 'customName' && $('customName')) $('customName').value = value;
+  if(inputId !== 'compareCustomName' && $('compareCustomName')) $('compareCustomName').value = value;
+  populateSelectors(true);
+  updateEditTargetUI();
+  renderAll();
+}
+function changeFuelType(){
+  if(getEditKey() !== CUSTOM_KEY) return;
+  const oldType = currentData.type;
+  currentData.type = $('fuelTypeSelect').value;
+  if(oldType !== currentData.type){
+    if(currentData.type === 'gnl'){
+      currentData.gnlPrice = currentData.gnlPrice || 700;
+      currentData.dieselPrice = currentData.dieselPrice || currentData.fuelPrice || 750;
+      currentData.ureaPrice = currentData.ureaPrice || 500;
+      currentData.dieselPct = currentData.dieselPct || 0;
+      currentData.ureaPct = currentData.ureaPct || 0;
+      currentData.consumption = currentData.consumption || 4.8;
+    } else {
+      currentData.fuelPrice = currentData.fuelPrice || currentData.dieselPrice || 750;
+      currentData.consumption = currentData.consumption || 2.7;
+    }
+  }
+  saveCurrentModel();
+  fillForm(currentData);
+  renderAll();
+}
+
+function calc(model){
+  const truckValue = model.priceUsd * model.exchangeRate;
+  const km = Math.max(model.kmMonth || 0, 1);
+  const fleet = Math.max(model.fleetSize || 0, 1);
+  const depreciation = Math.max((truckValue - model.residualValue) / (Math.max(model.usefulYears,1) * 12), 0);
+  const administrative = (model.adminExpenses || 0) / fleet;
+  const cmOro = (model.cmOroRate || 0) * km;
+  const cmBlue = (model.cmBlueRate || 0) * km;
+  const maintenanceManual = model.maintenance || 0;
+  const maintenanceContract = maintenanceManual !== 0 ? 0 : (cmOro !== 0 ? cmOro : (cmBlue !== 0 ? cmBlue : 0));
+  let fuel = { total:0, parts:[] };
+  if(model.type === 'gnl'){
+    const gnlKg = km / Math.max(model.consumption || 0, 0.0001);
+    const dieselLt = gnlKg * (model.dieselPct || 0);
+    const ureaLt = gnlKg * (model.ureaPct || 0);
+    const gnlCost = gnlKg * (model.gnlPrice || 0);
+    const dieselCost = dieselLt * (model.dieselPrice || 0);
+    const ureaCost = ureaLt * (model.ureaPrice || 0);
+    fuel = { total: gnlCost + dieselCost + ureaCost, gnlKg, dieselLt, ureaLt, parts:[
+      {name:'GNL', monthly:gnlCost, type:'Variable'},
+      {name:'Diésel apoyo', monthly:dieselCost, type:'Variable'},
+      {name:'Urea', monthly:ureaCost, type:'Variable'}
+    ]};
+  } else {
+    const liters = km / Math.max(model.consumption || 0, 0.0001);
+    const cost = liters * (model.fuelPrice || 0);
+    fuel = { total: cost, liters, parts:[{name:'Diésel', monthly:cost, type:'Variable'}]};
+  }
+  const fixed = [
+    {name:'Depreciación', monthly:depreciation, type:'Fijo'},
+    {name:'Seguro', monthly:model.insurance || 0, type:'Fijo'},
+    {name:'Permiso / patente', monthly:model.permit || 0, type:'Fijo'},
+    {name:'GPS / gestión de flota', monthly:model.gps || 0, type:'Fijo'},
+    {name:'Administrativo', monthly:administrative, type:'Fijo'},
+    {name:'Contrato mantención', monthly:maintenanceContract, type:'Fijo'}
+  ];
+  const variable = [
+    {name:'Sueldo conductor', monthly:model.salary || 0, type:'Variable'},
+    ...fuel.parts,
+    {name:'Neumáticos', monthly:model.tires || 0, type:'Variable'},
+    {name:'Peajes', monthly:model.tolls || 0, type:'Variable'},
+    {name:'Gastos diarios conductor', monthly:model.dailyDriver || 0, type:'Variable'},
+    {name:'Mantención', monthly:maintenanceManual, type:'Variable'}
+  ];
+  const finance = {name:'Financiamiento', monthly:model.financing || 0, type:'Fijo'};
+  const rows = [...fixed, finance, ...variable]
+    .filter(r => Math.abs(r.monthly) > 0.01)
+    .map(r => ({...r, perKm:r.monthly / km}));
+  const fixedMonthly = fixed.reduce((a,b)=>a+b.monthly,0) + finance.monthly;
+  const variableMonthly = variable.reduce((a,b)=>a+b.monthly,0);
+  const totalMonthly = fixedMonthly + variableMonthly;
+  return {truckValue, depreciation, administrative, maintenanceContract, fuel, rows, fixedMonthly, variableMonthly, totalMonthly, km, fleet, costKm:totalMonthly/km, fleetMonthly:totalMonthly*fleet, fleetAnnual:totalMonthly*fleet*12, fuelKm:fuel.total/km};
+}
+
+function renderAll(){
+  if(currentMode === 'compare'){
+    updateEditTargetUI();
+    renderComparison();
+    return;
+  }
+  const focusKey = getEditKey();
+  const focusResult = calc(currentData);
+  $('modelTag').textContent = `${modelLabel(focusKey)} · ${currentData.application}`;
+  $('kpiCostKm').textContent = clp.format(focusResult.costKm);
+  $('kpiMonthly').textContent = clp.format(focusResult.totalMonthly);
+  $('kpiFleetMonthly').textContent = clp.format(focusResult.fleetMonthly);
+  $('kpiFuelKm').textContent = clp.format(focusResult.fuelKm);
+  $('fuelKpiText').textContent = currentData.type === 'gnl' ? 'GNL + diésel + urea' : 'Diésel';
+  renderSingleFuelBreakdown(focusResult, currentData, modelLabel(focusKey));
+  const fixedPct = focusResult.totalMonthly ? focusResult.fixedMonthly / focusResult.totalMonthly * 100 : 0;
+  const distribution = buildCostDistribution(focusResult.rows, 7, focusResult.km);
+  $('costDistributionLabel').textContent = `${distribution.length} conceptos`;
+  renderLegendTo('distributionLegend', distribution, focusResult.totalMonthly);
+  renderRows(focusResult.rows);
+  drawDistributionDonut($('pieCanvas'), distribution, focusResult.totalMonthly, focusResult.costKm);
+  drawBars($('barCanvas'), focusResult.rows);
+  renderInterpretation(focusResult, distribution, fixedPct, modelLabel(focusKey));
+}
+function renderRows(rows){
+  $('detailRows').innerHTML = rows.slice()
+    .sort((a,b)=>b.monthly-a.monthly)
+    .map(r=>`<tr><td>${esc(r.name)}</td><td>${clp.format(r.monthly)}</td><td>${clp.format(r.perKm)}</td><td><span class="tag">${esc(r.type)}</span></td></tr>`)
+    .join('');
+}
+function fmtFuelNumber(value, decimals=2){
+  if(value === null || value === undefined || !Number.isFinite(Number(value))) return '—';
+  return Number(value).toLocaleString('es-CL',{minimumFractionDigits:decimals,maximumFractionDigits:decimals});
+}
+function fuelPartMonthly(result, name){
+  const target = normalizeCostName(name);
+  return result.fuel.parts?.find(p => normalizeCostName(p.name) === target)?.monthly || 0;
+}
+function fuelMetrics(model, result){
+  const isGnl = model.type === 'gnl';
+  const km = Math.max(result.km || 0, 1);
+  const gnlKg = isGnl ? (result.fuel.gnlKg || 0) : null;
+  const dieselSupportLt = isGnl ? (result.fuel.dieselLt || 0) : null;
+  const ureaLt = isGnl ? (result.fuel.ureaLt || 0) : null;
+  const dieselLt = !isGnl ? (result.fuel.liters || 0) : null;
+  const gnlCost = isGnl ? fuelPartMonthly(result,'GNL') : null;
+  const dieselSupportCost = isGnl ? fuelPartMonthly(result,'Diésel apoyo') : null;
+  const dieselCost = !isGnl ? (result.fuel.total || 0) : null;
+  return {
+    type:isGnl?'gnl':'diesel',
+    gnlKmKg:isGnl ? (model.consumption || 0) : null,
+    gnlKgMonth:gnlKg,
+    gnlKgKm:gnlKg !== null ? gnlKg / km : null,
+    gnlCostKm:gnlCost !== null ? gnlCost / km : null,
+    dieselSupportLtMonth:dieselSupportLt,
+    dieselSupportLtKm:dieselSupportLt !== null ? dieselSupportLt / km : null,
+    dieselSupportCostKm:dieselSupportCost !== null ? dieselSupportCost / km : null,
+    ureaLtMonth:ureaLt,
+    dieselKmL:!isGnl ? (model.consumption || 0) : null,
+    dieselLtMonth:dieselLt,
+    dieselLtKm:dieselLt !== null ? dieselLt / km : null,
+    dieselCostKm:dieselCost !== null ? dieselCost / km : null,
+    totalFuelCostKm:result.fuelKm
+  };
+}
+function fuelCard(label, value, helper){
+  return `<div class="fuelDataCard"><strong>${esc(label)}</strong><div class="fuelValue">${value}</div><small>${esc(helper||'')}</small></div>`;
+}
+function renderSingleFuelBreakdown(result, model, label){
+  const m = fuelMetrics(model, result);
+  $('singleFuelTypeTag').textContent = model.type === 'gnl' ? 'GNL + apoyo diésel' : 'Diésel';
+  if(model.type === 'gnl'){
+    $('singleFuelBreakdown').innerHTML = [
+      fuelCard('Rendimiento GNL', `${fmtFuelNumber(m.gnlKmKg,2)} km/kg`, 'Valor usado para simular consumo GNL'),
+      fuelCard('Consumo GNL mensual', `${fmtFuelNumber(m.gnlKgMonth,0)} kg`, 'Km mes ÷ km/kg'),
+      fuelCard('Diésel apoyo mensual', `${fmtFuelNumber(m.dieselSupportLtMonth,0)} L`, 'Kg GNL × % diésel apoyo'),
+      fuelCard('Urea mensual', `${fmtFuelNumber(m.ureaLtMonth,0)} L`, 'Kg GNL × % urea')
+    ].join('');
+    $('singleFuelNote').textContent = `${label}: GNL y diésel de apoyo quedan separados. Costo GNL: ${clp.format(m.gnlCostKm)} por km; costo diésel apoyo: ${clp.format(m.dieselSupportCostKm)} por km; costo combustible total: ${clp.format(m.totalFuelCostKm)} por km.`;
+  } else {
+    $('singleFuelBreakdown').innerHTML = [
+      fuelCard('Rendimiento diésel', `${fmtFuelNumber(m.dieselKmL,2)} km/L`, 'Valor usado para consumo diésel'),
+      fuelCard('Consumo diésel mensual', `${fmtFuelNumber(m.dieselLtMonth,0)} L`, 'Km mes ÷ km/L'),
+      fuelCard('Consumo diésel / km', `${fmtFuelNumber(m.dieselLtKm,3)} L/km`, 'Litros por kilómetro'),
+      fuelCard('Costo diésel / km', clp.format(m.dieselCostKm), 'Costo combustible separado')
+    ].join('');
+    $('singleFuelNote').textContent = `${label}: el combustible se muestra como diésel separado, sin mezclarlo con conductor, mantención u otros costos.`;
+  }
+}
+function formatFuelMetric(value, format='number', unit='', decimals=2){
+  if(value === null || value === undefined || !Number.isFinite(Number(value))) return '—';
+  if(format === 'currency') return clp.format(value);
+  return `${fmtFuelNumber(value, decimals)}${unit ? ' ' + unit : ''}`;
+}
+function rowFuelMetric(label, leftValue, rightValue, format='number', unit='', decimals=2){
+  const leftTxt = formatFuelMetric(leftValue, format, unit, decimals);
+  const rightTxt = formatFuelMetric(rightValue, format, unit, decimals);
+  let diffTxt = '—';
+  if(leftValue !== null && leftValue !== undefined && rightValue !== null && rightValue !== undefined && Number.isFinite(Number(leftValue)) && Number.isFinite(Number(rightValue))){
+    const diff = Number(rightValue) - Number(leftValue);
+    diffTxt = format === 'currency' ? signedCurrency(diff) : `${diff > 0 ? '+' : ''}${fmtFuelNumber(diff, decimals)}${unit ? ' ' + unit : ''}`;
+  }
+  return `<tr><td>${esc(label)}</td><td>${leftTxt}</td><td>${rightTxt}</td><td>${diffTxt}</td></tr>`;
+}
+function renderFuelComparison(leftData, rightData, left, right, leftLabel, rightLabel){
+  const lm = fuelMetrics(leftData, left);
+  const rm = fuelMetrics(rightData, right);
+  $('fuelHeadLeft').textContent = leftLabel;
+  $('fuelHeadRight').textContent = rightLabel;
+  $('fuelComparisonRows').innerHTML = [
+    rowFuelMetric('Rendimiento GNL', lm.gnlKmKg, rm.gnlKmKg, 'number', 'km/kg', 2),
+    rowFuelMetric('Consumo GNL mensual', lm.gnlKgMonth, rm.gnlKgMonth, 'number', 'kg', 0),
+    rowFuelMetric('Costo GNL / km', lm.gnlCostKm, rm.gnlCostKm, 'currency'),
+    rowFuelMetric('Diésel apoyo GNL mensual', lm.dieselSupportLtMonth, rm.dieselSupportLtMonth, 'number', 'L', 0),
+    rowFuelMetric('Costo diésel apoyo / km', lm.dieselSupportCostKm, rm.dieselSupportCostKm, 'currency'),
+    rowFuelMetric('Rendimiento diésel', lm.dieselKmL, rm.dieselKmL, 'number', 'km/L', 2),
+    rowFuelMetric('Consumo diésel mensual', lm.dieselLtMonth, rm.dieselLtMonth, 'number', 'L', 0),
+    rowFuelMetric('Costo diésel / km', lm.dieselCostKm, rm.dieselCostKm, 'currency'),
+    rowFuelMetric('Costo combustible total / km', lm.totalFuelCostKm, rm.totalFuelCostKm, 'currency')
+  ].join('');
+}
+function costPartKm(result, names){
+  const wanted = names.map(n => normalizeCostName(n));
+  return result.rows
+    .filter(r => wanted.includes(normalizeCostName(r.name)))
+    .reduce((acc,r) => acc + r.perKm, 0);
+}
+function costShareText(result, itemName){
+  const row = result.rows.find(r => normalizeCostName(r.name) === normalizeCostName(itemName));
+  const share = row && result.totalMonthly ? row.monthly / result.totalMonthly * 100 : 0;
+  return `${clp.format(row?.perKm || 0)} / km (${num.format(share)}%)`;
+}
+function mainCostRow(result){
+  return result.rows.slice().sort((a,b)=>b.perKm-a.perKm)[0] || {name:'costo principal', monthly:0, perKm:0};
+}
+function fuelConceptLabel(data){
+  return data.type === 'gnl' ? 'GNL + diésel apoyo + urea' : 'diésel';
+}
+function renderCompareDonutInterpretation(leftData, rightData, left, right, leftLabel, rightLabel){
+  const el = $('compareDonutInterpretation');
+  if(!el) return;
+  const leftMain = mainCostRow(left);
+  const rightMain = mainCostRow(right);
+  const leftMainPct = left.totalMonthly ? leftMain.monthly / left.totalMonthly * 100 : 0;
+  const rightMainPct = right.totalMonthly ? rightMain.monthly / right.totalMonthly * 100 : 0;
+  const fuelDiff = right.fuelKm - left.fuelKm;
+  const leftFuelShare = left.totalMonthly ? left.fuel.total / left.totalMonthly * 100 : 0;
+  const rightFuelShare = right.totalMonthly ? right.fuel.total / right.totalMonthly * 100 : 0;
+  const fixedDiff = (right.fixedMonthly / Math.max(right.km,1)) - (left.fixedMonthly / Math.max(left.km,1));
+  const leftFuelDetail = leftData.type === 'gnl'
+    ? `GNL ${costShareText(left,'GNL')}, diésel apoyo ${costShareText(left,'Diésel apoyo')} y urea ${costShareText(left,'Urea')}`
+    : `diésel ${costShareText(left,'Diésel')}`;
+  const rightFuelDetail = rightData.type === 'gnl'
+    ? `GNL ${costShareText(right,'GNL')}, diésel apoyo ${costShareText(right,'Diésel apoyo')} y urea ${costShareText(right,'Urea')}`
+    : `diésel ${costShareText(right,'Diésel')}`;
+  const fuelWinner = Math.abs(fuelDiff) < 0.005 ? '' : (fuelDiff > 0 ? leftLabel : rightLabel);
+  const fuelLoser = Math.abs(fuelDiff) < 0.005 ? '' : (fuelDiff > 0 ? rightLabel : leftLabel);
+  const fuelSentence = Math.abs(fuelDiff) < 0.005
+    ? `Al comparar ambos gráficos, el combustible queda bastante parejo entre ${leftLabel} y ${rightLabel}.`
+    : `Al comparar ambos gráficos, ${fuelWinner} queda más conveniente en combustible.`;
+  const fuelStructureSentence = leftData.type !== rightData.type
+    ? `${leftData.type === 'gnl' ? leftLabel : rightLabel} reparte el consumo entre GNL, diésel de apoyo y urea, mientras que ${leftData.type === 'diesel' ? leftLabel : rightLabel} concentra ese gasto en diésel.`
+    : `Como ambos usan el mismo tipo de combustible, la diferencia viene del rendimiento y del precio utilizado.`;
+  const focusSentence = Math.abs(fuelDiff) < 0.005
+    ? `En ese caso, conviene mirar los costos fijos y el resto de los componentes para entender el resultado final por km.`
+    : `La diferencia principal se ve en el bloque de combustible; los costos fijos sirven para completar la lectura del costo final por km.`;
+  el.textContent = `${fuelSentence} ${fuelStructureSentence} ${focusSentence}`;
+}
+function signedCurrency(value){ if(Math.abs(value) < 0.005) return '$0'; return `${value > 0 ? '+' : ''}${clp.format(value)}`; }
+function rowMetric(label, leftValue, rightValue, format='currency'){
+  const diff = rightValue - leftValue;
+  const fmt = format === 'percent' ? (v) => `${num.format(v)}%` : (v) => clp.format(v);
+  const diffFmt = format === 'percent' ? `${diff > 0 ? '+' : ''}${num.format(diff)}%` : signedCurrency(diff);
+  return `<tr><td>${esc(label)}</td><td>${fmt(leftValue)}</td><td>${fmt(rightValue)}</td><td>${diffFmt}</td></tr>`;
+}
+function maintenanceKm(result){ return result.rows.filter(r => r.name.toLowerCase().includes('mantención')).reduce((a,b)=>a+b.perKm,0); }
+function renderComparison(){
+  if(currentMode !== 'compare') return;
+  const editingKey = getEditKey();
+  if(MODELS[editingKey]){
+    MODELS[editingKey] = structuredClone(currentData);
+    if(editingKey === CUSTOM_KEY){
+      MODELS[CUSTOM_KEY].name = currentData.name || MODELS[CUSTOM_KEY].name || CUSTOM_LABEL;
+      MODELS[CUSTOM_KEY].custom = true;
+    }
+  }
+  const rightKey = getCompetitorKey();
+  const fallbackLeft = MODEL_DEFAULTS[activeModel] || MODEL_DEFAULTS['FM 62T GNL'];
+  const fallbackRight = MODEL_DEFAULTS[rightKey] || MODEL_DEFAULTS['FM 62T'];
+  const leftData = MODELS[activeModel] || fallbackLeft;
+  const rightData = MODELS[rightKey] || fallbackRight;
+  const left = calc(leftData);
+  const right = calc(rightData);
+  const leftLabel = modelLabel(activeModel);
+  const rightLabel = modelLabel(rightKey);
+  $('leftName').textContent = leftLabel;
+  $('rightName').textContent = rightLabel;
+  $('legendLeft').textContent = leftLabel;
+  $('legendRight').textContent = rightLabel;
+  $('compareHeadLeft').textContent = leftLabel;
+  $('compareHeadRight').textContent = rightLabel;
+  $('leftCost').textContent = clp.format(left.costKm);
+  $('rightCost').textContent = clp.format(right.costKm);
+  $('leftMonthly').textContent = `Costo mensual: ${clp.format(left.totalMonthly)}`;
+  $('rightMonthly').textContent = `Costo mensual: ${clp.format(right.totalMonthly)}`;
+  $('leftFleet').textContent = `Flota mensual: ${clp.format(left.fleetMonthly)}`;
+  $('rightFleet').textContent = `Flota mensual: ${clp.format(right.fleetMonthly)}`;
+  const diff = right.costKm - left.costKm;
+  const percent = left.costKm ? (diff / left.costKm) * 100 : 0;
+  const monthlyFleetImpact = Math.abs(right.fleetMonthly - left.fleetMonthly);
+  if(Math.abs(diff) < 0.005){
+    $('deltaTitle').textContent = 'Resultado empatado';
+    $('deltaDescription').textContent = 'Ambos modelos quedan prácticamente con el mismo costo por kilómetro.';
+  } else if(diff > 0){
+    $('deltaTitle').textContent = `${leftLabel} queda más conveniente`;
+    $('deltaDescription').textContent = `Diferencia estimada de ${clp.format(Math.abs(diff))} por km, equivalente a ${num.format(Math.abs(percent))}% frente al comparado. En flota mensual, la diferencia entre ambos escenarios es ${clp.format(monthlyFleetImpact)}.`;
+  } else {
+    $('deltaTitle').textContent = `${rightLabel} queda más conveniente`;
+    $('deltaDescription').textContent = `El modelo comparado queda ${clp.format(Math.abs(diff))} por km más bajo, equivalente a ${num.format(Math.abs(percent))}%. En flota mensual, la diferencia entre ambos escenarios es ${clp.format(monthlyFleetImpact)}.`;
+  }
+  $('deltaValue').textContent = clp.format(Math.abs(diff));
+  const leftFixedPct = left.totalMonthly ? left.fixedMonthly / left.totalMonthly * 100 : 0;
+  const rightFixedPct = right.totalMonthly ? right.fixedMonthly / right.totalMonthly * 100 : 0;
+  $('comparisonRows').innerHTML = [
+    rowMetric('Costo final / km', left.costKm, right.costKm),
+    rowMetric('Costo mensual / camión', left.totalMonthly, right.totalMonthly),
+    rowMetric('Costo mensual flota', left.fleetMonthly, right.fleetMonthly),
+    rowMetric('Costo combustible / km', left.fuelKm, right.fuelKm),
+    rowMetric('Costos fijos / km', left.fixedMonthly / Math.max(left.km,1), right.fixedMonthly / Math.max(right.km,1)),
+    rowMetric('Costos variables / km', left.variableMonthly / Math.max(left.km,1), right.variableMonthly / Math.max(right.km,1)),
+    rowMetric('Mantención / km', maintenanceKm(left), maintenanceKm(right)),
+    rowMetric('Peso costos fijos', leftFixedPct, rightFixedPct, 'percent'),
+    rowMetric('Valor camión CLP', left.truckValue, right.truckValue)
+  ].join('');
+  drawComparisonBars($('compareCanvas'), left, right, leftLabel, rightLabel);
+  const leftDist = buildCostDistribution(left.rows, 7, left.km);
+  const rightDist = buildCostDistribution(right.rows, 7, right.km);
+  $('leftDistTitle').textContent = `Distribución ${leftLabel}`;
+  $('rightDistTitle').textContent = `Distribución ${rightLabel}`;
+  $('leftDistCost').textContent = `${clp.format(left.costKm)} / km`;
+  $('rightDistCost').textContent = `${clp.format(right.costKm)} / km`;
+  renderLegendTo('leftDistributionLegend', leftDist, left.totalMonthly);
+  renderLegendTo('rightDistributionLegend', rightDist, right.totalMonthly);
+  drawDistributionDonut($('leftPieCanvas'), leftDist, left.totalMonthly, left.costKm);
+  drawDistributionDonut($('rightPieCanvas'), rightDist, right.totalMonthly, right.costKm);
+  renderCompareDonutInterpretation(leftData, rightData, left, right, leftLabel, rightLabel);
+  const winner = Math.abs(diff) < 0.005 ? 'Ambos modelos' : (diff > 0 ? leftLabel : rightLabel);
+  const mainDriverLeft = left.rows.slice().sort((a,b)=>b.perKm-a.perKm)[0]?.name || 'costo principal';
+  const mainDriverRight = right.rows.slice().sort((a,b)=>b.perKm-a.perKm)[0]?.name || 'costo principal';
+  $('compareInterpretation').textContent = `${winner} presenta el mejor resultado en costo por kilómetro. Los gráficos circulares permiten ver si la diferencia viene del combustible correspondiente, depreciación, conductor u otros costos. En ${leftLabel}, el mayor componente es ${mainDriverLeft.toLowerCase()}; en ${rightLabel}, el mayor componente es ${mainDriverRight.toLowerCase()}.`;
+}
+
+function prepCanvas(canvas){
+  if(!canvas) return {ctx:null,w:0,h:0};
+  const rect = canvas.getBoundingClientRect();
+  const styles = window.getComputedStyle(canvas);
+  const parent = canvas.parentElement;
+  const cssW = parseFloat(styles.width) || 0;
+  const cssH = parseFloat(styles.height) || 0;
+  const w = Math.max(300, rect.width || cssW || parent?.clientWidth || 320);
+  const h = Math.max(190, rect.height || cssH || 240);
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h};
+}
+const CHART_COLORS = ['#003f5c','#00d5e6','#2f9e44','#ffa600','#d45087','#665191','#f95d6a','#7a9e9f'];
+const COST_COLORS = {
+  driver:'#003f5c',
+  fuel:'#00d5e6',
+  fuelSupport:'#7ee8ef',
+  depreciation:'#2f9e44',
+  administrative:'#ffa600',
+  tires:'#d45087',
+  maintenance:'#665191',
+  urea:'#f95d6a',
+  financing:'#536067',
+  insurance:'#7a9e9f',
+  permit:'#b88900',
+  gps:'#4d7c8a',
+  tolls:'#8f63b3',
+  dailyDriver:'#a86f3a',
+  other:'#9aa9ad'
+};
+function normalizeCostName(name){
+  return String(name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+function semanticCostColor(name, index=0){
+  const n = normalizeCostName(name);
+  if(n === 'gnl' || n === 'diesel') return COST_COLORS.fuel;
+  if(n.includes('diesel apoyo')) return COST_COLORS.fuelSupport;
+  if(n.includes('sueldo conductor')) return COST_COLORS.driver;
+  if(n.includes('depreciacion')) return COST_COLORS.depreciation;
+  if(n.includes('administrativo')) return COST_COLORS.administrative;
+  if(n.includes('neumatic')) return COST_COLORS.tires;
+  if(n.includes('mantencion') || n.includes('contrato mantencion')) return COST_COLORS.maintenance;
+  if(n.includes('urea')) return COST_COLORS.urea;
+  if(n.includes('financiamiento')) return COST_COLORS.financing;
+  if(n.includes('seguro')) return COST_COLORS.insurance;
+  if(n.includes('permiso') || n.includes('patente')) return COST_COLORS.permit;
+  if(n.includes('gps') || n.includes('gestion')) return COST_COLORS.gps;
+  if(n.includes('peaje')) return COST_COLORS.tolls;
+  if(n.includes('gastos diarios')) return COST_COLORS.dailyDriver;
+  if(n.includes('otros')) return COST_COLORS.other;
+  return CHART_COLORS[index % CHART_COLORS.length];
+}
+function semanticCostRank(name){
+  const n = normalizeCostName(name);
+  if(n === 'gnl' || n === 'diesel') return 10;
+  if(n.includes('diesel apoyo')) return 11;
+  if(n.includes('urea')) return 12;
+  if(n.includes('sueldo conductor')) return 20;
+  if(n.includes('depreciacion')) return 30;
+  if(n.includes('financiamiento')) return 35;
+  if(n.includes('administrativo')) return 40;
+  if(n.includes('contrato mantencion')) return 50;
+  if(n.includes('mantencion')) return 51;
+  if(n.includes('neumatic')) return 60;
+  if(n.includes('seguro')) return 70;
+  if(n.includes('permiso') || n.includes('patente')) return 80;
+  if(n.includes('gps') || n.includes('gestion')) return 90;
+  if(n.includes('peaje')) return 100;
+  if(n.includes('gastos diarios')) return 110;
+  if(n.includes('otros')) return 999;
+  return 500;
+}
+function orderDistribution(items){
+  return items.slice().sort((a,b)=>{
+    const ra = semanticCostRank(a.name), rb = semanticCostRank(b.name);
+    if(ra !== rb) return ra - rb;
+    return String(a.name).localeCompare(String(b.name),'es');
+  });
+}
+function buildCostDistribution(rows, maxItems=7, km=1){
+  const clean = rows.filter(r => Math.abs(r.monthly) > 0.01).sort((a,b)=>b.monthly-a.monthly);
+  const selected = clean.slice(0,maxItems).map((r,i)=>({...r,color:r.color || semanticCostColor(r.name, i)}));
+  const rest = clean.slice(maxItems);
+  const otherMonthly = rest.reduce((a,b)=>a+b.monthly,0);
+  const ordered = orderDistribution(selected);
+  if(otherMonthly > 0.01) ordered.push({name:'Otros costos', monthly:otherMonthly, perKm:otherMonthly / Math.max(km || 0, 1), type:'Resumen', color:COST_COLORS.other});
+  return ordered;
+}
+function renderLegendTo(elementId, distribution, totalMonthly){
+  if(!$(elementId)) return;
+  $(elementId).innerHTML = distribution.map((r,i)=>{
+    const pct = totalMonthly ? (r.monthly / totalMonthly) * 100 : 0;
+    const color = r.color || CHART_COLORS[i % CHART_COLORS.length];
+    return `<div class="legendRow" title="${esc(r.name)}: ${clp.format(r.perKm)} por km">
+      <span class="legendDot" style="--c:${color}"></span>
+      <span class="legendName">${esc(r.name)}</span>
+      <span class="legendValue">${num.format(pct)}%</span>
+    </div>`;
+  }).join('');
+}
+function drawDistributionDonut(canvas, distribution, totalMonthly, costKm){
+  const {ctx,w,h} = prepCanvas(canvas);
+  if(!ctx) return;
+  ctx.clearRect(0,0,w,h);
+  const total = Math.max(totalMonthly, 1);
+  const cx = w/2, cy = h/2, r = Math.min(w,h)*0.38, line = Math.max(24, r*0.28);
+  ctx.lineWidth = line;
+  ctx.lineCap = 'butt';
+  ctx.strokeStyle = '#ecffff';
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+  let start = -Math.PI/2;
+  distribution.forEach((part,i)=>{
+    const angle = (part.monthly/total) * Math.PI*2;
+    if(angle <= 0) return;
+    const gap = distribution.length > 1 ? 0.012 : 0;
+    ctx.strokeStyle = part.color || CHART_COLORS[i % CHART_COLORS.length];
+    ctx.beginPath(); ctx.arc(cx,cy,r,start+gap,start+angle-gap); ctx.stroke();
+    start += angle;
+  });
+  ctx.fillStyle = '#052b31'; ctx.font = '850 22px Segoe UI, Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(clp.format(costKm),cx,cy-5);
+  ctx.fillStyle = '#66828a'; ctx.font = '750 12px Segoe UI, Arial'; ctx.fillText('Costo / km',cx,cy+20);
+}
+function renderInterpretation(result, distribution, fixedPct, label){
+  if(!distribution.length || !result.totalMonthly){ $('interpretationText').textContent = 'Ingresa costos para generar la lectura del resultado.'; return; }
+  const ranked = distribution.slice().sort((a,b)=>b.monthly-a.monthly);
+  const main = ranked[0];
+  const second = ranked[1];
+  const mainPct = (main.monthly / result.totalMonthly) * 100;
+  const fuelPct = result.totalMonthly ? (result.fuel.total / result.totalMonthly) * 100 : 0;
+  const secondText = second ? ` Luego aparece ${second.name.toLowerCase()} con ${num.format((second.monthly/result.totalMonthly)*100)}%.` : '';
+  const fuelNames = result.fuel.parts?.map(p => p.name).filter(Boolean).join(' + ') || 'combustible';
+  const fuelText = result.fuel.total > 0.01 ? ` El bloque de ${fuelNames.toLowerCase()} pesa ${num.format(fuelPct)}% del costo mensual, por lo que su precio/rendimiento es una de las palancas más sensibles.` : '';
+  $('interpretationText').textContent = `${label} queda en ${clp.format(result.costKm)} por km. El componente de mayor peso es ${main.name.toLowerCase()}, con ${num.format(mainPct)}% del costo operacional.${secondText}${fuelText} La relación general queda en ${num.format(fixedPct)}% fijo y ${num.format(100-fixedPct)}% variable.`;
+}
+function drawBars(canvas, rows){
+  const {ctx,w,h} = prepCanvas(canvas);
+  if(!ctx) return;
+  ctx.clearRect(0,0,w,h);
+  const top = rows.slice().sort((a,b)=>b.perKm-a.perKm).slice(0,7);
+  const max = Math.max(...top.map(r=>r.perKm),1);
+  const labelW = Math.min(170, w*0.42);
+  const barW = w - labelW - 42;
+  const y0 = 18, gap = 9;
+  const rowH = (h - 36 - gap*(top.length-1)) / Math.max(top.length,1);
+  ctx.font = '700 12px Segoe UI, Arial';
+  top.forEach((r,i)=>{
+    const y = y0 + i*(rowH+gap);
+    ctx.fillStyle = '#163c43'; ctx.textAlign = 'left';
+    const label = r.name.length > 22 ? r.name.slice(0,21)+'…' : r.name;
+    ctx.fillText(label, 8, y + rowH*.62);
+    ctx.fillStyle = '#e7ffff'; roundRect(ctx,labelW,y+4,barW,rowH-8,9); ctx.fill();
+    ctx.fillStyle = i === 0 ? '#052b31' : '#00c9d5'; roundRect(ctx,labelW,y+4,barW*(r.perKm/max),rowH-8,9); ctx.fill();
+    ctx.fillStyle = '#345b63'; ctx.textAlign = 'right';
+    ctx.fillText(clp.format(r.perKm), w-8, y + rowH*.62);
+  });
+}
+function drawComparisonBars(canvas, left, right, leftLabel, rightLabel){
+  const {ctx,w,h} = prepCanvas(canvas);
+  if(!ctx) return;
+  ctx.clearRect(0,0,w,h);
+  const rows = [
+    {label:'Total', left:left.costKm, right:right.costKm},
+    {label:'Combustible', left:left.fuelKm, right:right.fuelKm},
+    {label:'Fijos', left:left.fixedMonthly / Math.max(left.km,1), right:right.fixedMonthly / Math.max(right.km,1)},
+    {label:'Variables', left:left.variableMonthly / Math.max(left.km,1), right:right.variableMonthly / Math.max(right.km,1)},
+    {label:'Mantención', left:maintenanceKm(left), right:maintenanceKm(right)}
+  ];
+  const max = Math.max(...rows.flatMap(r=>[r.left,r.right]),1);
+  const labelW = Math.min(118, w * 0.34);
+  const valueW = 74;
+  const chartW = Math.max(120, w - labelW - valueW - 18);
+  const top = 14;
+  const rowH = (h - top - 8) / rows.length;
+  const barH = Math.min(12, rowH * 0.24);
+  ctx.font = '750 12px Segoe UI, Arial';
+  rows.forEach((r,i)=>{
+    const y = top + i * rowH;
+    ctx.fillStyle = '#163c43'; ctx.textAlign = 'left'; ctx.fillText(r.label, 8, y + rowH * 0.58);
+    ctx.fillStyle = '#e7ffff'; roundRect(ctx, labelW, y + rowH * 0.22, chartW, barH, 8); ctx.fill(); roundRect(ctx, labelW, y + rowH * 0.56, chartW, barH, 8); ctx.fill();
+    ctx.fillStyle = '#052b31'; roundRect(ctx, labelW, y + rowH * 0.22, chartW * (r.left / max), barH, 8); ctx.fill();
+    ctx.fillStyle = '#00c9d5'; roundRect(ctx, labelW, y + rowH * 0.56, chartW * (r.right / max), barH, 8); ctx.fill();
+    ctx.fillStyle = '#345b63'; ctx.textAlign = 'right'; ctx.font = '750 11px Segoe UI, Arial'; ctx.fillText(clp.format(Math.max(r.left,r.right)), w - 8, y + rowH * 0.56); ctx.font = '750 12px Segoe UI, Arial';
+  });
+}
+function roundRect(ctx,x,y,w,h,r){
+  const rr = Math.min(r,w/2,h/2);
+  ctx.beginPath(); ctx.moveTo(x+rr,y); ctx.arcTo(x+w,y,x+w,y+h,rr); ctx.arcTo(x+w,y+h,x,y+h,rr); ctx.arcTo(x,y+h,x,y,rr); ctx.arcTo(x,y,x+w,y,rr); ctx.closePath();
+}
+function setMode(mode){
+  saveCurrentModel();
+  currentMode = mode;
+  if(mode === 'single') editTarget = 'main';
+  const isCompare = mode === 'compare';
+  $('modeSingle').classList.toggle('active',!isCompare);
+  $('modeCompare').classList.toggle('active',isCompare);
+  $('compareSelector').classList.toggle('hidden',!isCompare);
+  $('comparePanel').classList.toggle('hidden',!isCompare);
+  ['kpiCards','singleFuelPanel','singleVisualPanel','detailPanel'].forEach(id => {
+    const el = $(id);
+    if(el) el.classList.toggle('hidden', isCompare);
+  });
+  currentData = structuredClone(MODELS[getEditKey()]);
+  fillForm(currentData);
+  requestAnimationFrame(renderAll);
+}
+function setEditTarget(target){
+  saveCurrentModel();
+  editTarget = target;
+  currentData = structuredClone(MODELS[getEditKey()]);
+  fillForm(currentData);
+  renderAll();
+}
+function loadModel(name){
+  saveCurrentModel();
+  activeModel = name;
+  editTarget = 'main';
+  populateSelectors(false);
+  currentData = structuredClone(MODELS[activeModel]);
+  fillForm(currentData);
+  renderAll();
+}
+function resetModel(){
+  const key = getEditKey();
+  const original = structuredClone(MODEL_DEFAULTS[key]);
+  MODELS[key] = original;
+  if(key === CUSTOM_KEY) MODELS[CUSTOM_KEY].name = CUSTOM_LABEL;
+  currentData = structuredClone(MODELS[key]);
+  populateSelectors(false);
+  fillForm(currentData);
+  renderAll();
+}
+function init(){
+  populateApplications();
+  populateSelectors(false);
+  fillForm(currentData);
+  FIELD_IDS.forEach(id => { if($(id)) $(id).addEventListener('input', syncFromForm); });
+  $('applicationSelect').addEventListener('change', syncFromForm);
+  $('customName').addEventListener('input', () => { syncFromForm(); syncPersonalizedName('customName'); });
+  $('fuelTypeSelect').addEventListener('change', changeFuelType);
+  $('modelSelect').addEventListener('change', e => loadModel(e.target.value));
+  $('competitorSelect').addEventListener('change', () => { saveCurrentModel(); if(editTarget === 'compare') currentData = structuredClone(MODELS[getCompetitorKey()]); fillForm(currentData); renderAll(); });
+  $('compareCustomName').addEventListener('input', () => syncPersonalizedName('compareCustomName'));
+  $('editMainBtn').addEventListener('click', () => setEditTarget('main'));
+  $('editCompareBtn').addEventListener('click', () => setEditTarget('compare'));
+  $('modeSingle').addEventListener('click', () => setMode('single'));
+  $('modeCompare').addEventListener('click', () => setMode('compare'));
+  $('resetBtn').addEventListener('click', resetModel);
+  $('updateDollarBtn').addEventListener('click', () => updateDollarFromBancoCentral(true));
+  $('printBtn').addEventListener('click', () => { document.title = `TCO_GNL_${modelLabel(getEditKey()).replaceAll(' ','_')}_${new Date().toISOString().slice(0,10)}`; window.print(); });
+  window.addEventListener('resize', () => renderAll());
+  renderAll();
+  if(BC_DOLLAR_AUTO_LOAD) setTimeout(() => updateDollarFromBancoCentral(false), 250);
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
